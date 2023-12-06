@@ -1,0 +1,1 @@
+drop_foreign_key("post", "username", {"if_exists": true})

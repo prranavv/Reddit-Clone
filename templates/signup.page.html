@@ -1,0 +1,100 @@
+{{template "login" .}}
+
+{{define "form"}}
+<main class="form-signin w-100 m-auto">
+    <form action="/signup" method="post" onsubmit ="return validateForm()">
+      <img class="mb-4" src="../static/assets_login/brand/reddit-logo-2436.svg" alt="" width="72" height="57">
+      <h1 class="h3 mb-3 fw-normal">Sign in</h1>
+
+      <div class="form-floating">
+        <input type="text" class="form-control" id="Username" placeholder="" name="username">
+        <span id = "blankMsg" style="color:red"> </span> <br>  
+        <label for="Username">Username</label>
+      </div>
+      <div class="form-floating">
+        <input type="email" class="form-control" id="EmailAddress" placeholder="name@example.com" name="email">
+        <span id = "charMsg" style="color:red"> </span> <br>  
+        <label for="floatingInput">Email address</label>
+      </div>
+      <div class="form-floating">
+        <input type="password" class="form-control" id="Password" placeholder="Password" name="password">
+        <span id = "message1" style="color:red"> </span> <br>  
+        <label for="Password">Password</label>
+      </div>
+      <div class="form-floating">
+        <input type="password" class="form-control" id="ConfirmPassword" placeholder="Password">
+        <span id = "message2" style="color:red"> </span> <br>  
+        <label for="ConfirmPassword">Confirm Password</label>
+      </div>
+      <div class="form-check text-start my-3">
+        <input class="form-check-input" type="checkbox" value="remember-me" id="flexCheckDefault">
+        <label class="form-check-label" for="flexCheckDefault">
+          Remember me
+        </label>
+      </div>
+      <button class="btn btn-primary w-100 py-2" type="submit">Sign up</button>
+      <p class="mt-5 mb-3 text-body-secondary">&copy; 2017-2023</p>
+    </form>
+  </main>
+{{end}}
+
+{{define "js"}}
+<script>
+    function validateForm() {  
+    //collect form data in JavaScript variables  
+    var pw1 = document.getElementById("Password").value;  
+    var pw2 = document.getElementById("ConfirmPassword").value;  
+    var name1 = document.getElementById("Username").value;  
+    var name2 = document.getElementById("EmailAddress").value;  
+      
+    //check empty first name field  
+    if(name1 == "") {  
+      document.getElementById("blankMsg").innerHTML = "**Fill the first name";  
+      return false;  
+    }  
+      
+    //character data validation  
+    if(!isNaN(name1)){  
+      document.getElementById("blankMsg").innerHTML = "**Only characters are allowed"; 
+      return false;  
+    }  
+  
+   //character data validation  
+    if(!isNaN(name2)){  
+      document.getElementById("charMsg").innerHTML = "**Only characters are allowed";
+      return false;  
+    }   
+    
+    //check empty password field  
+    if(pw1 == "") {  
+      document.getElementById("message1").innerHTML = "**Fill the password please!";
+      return false;  
+    }  
+    
+    //check empty confirm password field  
+    if(pw2 == "") {  
+      document.getElementById("message2").innerHTML = "**Enter the password please!";  
+      return false;  
+    }   
+     
+    //minimum password length validation  
+    // if(pw1.length < 8) {  
+    //   document.getElementById("message1").innerHTML = "**Password length must be atleast 8 characters";  
+    //   return false;  
+    // }  
+  
+    //maximum length of password validation  
+    if(pw1.length > 15) {  
+      document.getElementById("message1").innerHTML = "**Password length must not exceed 15 characters";  
+      return false;  
+    }  
+    
+    if(pw1 != pw2) {  
+      document.getElementById("message2").innerHTML = "**Passwords are not same";  
+      return false;  
+    } else {  
+      return true  
+    }  
+ }  
+</script>
+{{end}}

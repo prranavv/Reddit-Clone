@@ -1,0 +1,1 @@
+add_column("liked", "no_of_likes", "integer", {"default":0})

@@ -1,0 +1,1 @@
+add_column("post", "user_id", "int", {})
