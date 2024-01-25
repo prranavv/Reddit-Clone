@@ -8,8 +8,7 @@
     <link href="../static/css/sidebars.css" rel="stylesheet">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <script src="https://unpkg.com/htmx.org@1.9.8" integrity="sha384-rgjA7mptc2ETQqXoYC3/zJvkU7K/aP44Y+z7xQuJiVnB/422P/Ak+F/AqFR7E4Wr" crossorigin="anonymous"></script>
-  </head>
+    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>  </head>
 <style>
     .navbar {
 background-color: #ffa500;
@@ -20,7 +19,7 @@ ul
 list-style-type: none;
 }
 .btns {
-  background-color: rgb(255, 255, 255); /* Blue background */
+  background-color: rgb(255, 255, 255); /* Blue background */   
   border: none; /* Remove borders */
   color: rgb(0, 0, 0); /* White text */
   padding: 5px 8px; /* Some padding */
@@ -79,10 +78,15 @@ list-style-type: none;
         <div class="col-9">
           <ul class="list-group"id="posts">
             {{$ewq:=.IsAuthenticated}}
+            {{$lusr:=.Username}}
             {{$res:=index .Data "Posts"}}
             {{range $res}}
             {{$liked:=.Liked.Liked}}
-            <li >
+            {{$usr:=.Username}}
+            {{$img:=.ImageUrl}}
+            {{$yn:=print ""}}
+            <li id="PostID-{{.Post_ID}}">
+              <div id="{{$usr}}-{{$lusr}}"></div>
               <br>
               <div class="card">
                 <div class="card-header">
@@ -92,14 +96,19 @@ list-style-type: none;
                   <blockquote class="blockquote mb-0">
                     <p><strong>{{.Title}}</strong></p>
                     <p class="para">{{.Body}}</p>
+                    {{if eq $img $yn}}
+
+                    {{else}}
+                    <img style="height: auto; width: 700px; padding-bottom: 20px;" src="{{.ImageUrl}}" alt="">
+                    {{end}}
                   </blockquote>
-                  <button class="btns" id="mybtn" {{if eq $ewq 1}} hx-get="/change-upicon/{{.Post_ID}}" hx-trigger="click" {{else}} type="submit" onclick="hrefFunction()" {{end}}>
+                  <button class="btns mybtn-up" id="mybtn-up" {{if eq $ewq 1}} hx-post="/change-upicon/{{.Post_ID}}/{{$lusr}}"  hx-trigger="click" type="submit" onclick="hrefFunction()" {{end}}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-arrow-up-circle" viewBox="0 0 16 16">
                       <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V11.5z"/>
                     </svg>
                   </button>
-                  <span id="vote">{{.Liked.Likes}}</span>
-                  <button class="btns" id="mybtn-down" {{if eq $ewq 1}} hx-get="/change-downicon/{{.Post_ID}}" hx-trigger="click" {{else}}  {{end}}>
+                  <span class="no_of_likes" id="no_of_likes-{{.Post_ID}}" hx-get="/getLikes/{{.Post_ID}}" hx-trigger="click">{{.Liked.Likes}}</span>
+                  <button class="btns" id="mybtn-down" {{if eq $ewq 1}} hx-post="/change-downicon/{{.Post_ID}}/{{$lusr}}" hx-trigger="click" {{else}}  {{end}}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-arrow-down-circle" viewBox="0 0 16 16">
                     <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v5.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V4.5z"/>
                   </svg>
@@ -110,6 +119,14 @@ list-style-type: none;
                       <path d="m2.165 15.803.02-.004c1.83-.363 2.948-.842 3.468-1.105A9.06 9.06 0 0 0 8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7c0 1.76.743 3.37 1.97 4.6a10.437 10.437 0 0 1-.524 2.318l-.003.011a10.722 10.722 0 0 1-.244.637c-.079.186.074.394.273.362a21.673 21.673 0 0 0 .693-.125zm.8-3.108a1 1 0 0 0-.287-.801C1.618 10.83 1 9.468 1 8c0-3.192 3.004-6 7-6s7 2.808 7 6c0 3.193-3.004 6-7 6a8.06 8.06 0 0 1-2.088-.272 1 1 0 0 0-.711.074c-.387.196-1.24.57-2.634.893a10.97 10.97 0 0 0 .398-2z"/>
                     </svg>
                   </button>
+                  {{if and (eq $ewq 1) (eq $usr $lusr)}}
+                  <button class="btns" hx-delete="/delete-post/{{.Post_ID}}" hx-target="#PostID-{{.Post_ID}}" hx-swap="outerHTML">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                      <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                      <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                    </svg>
+                  </button>
+                  {{end}}
                 </div>
               </div>
             </li>
@@ -117,7 +134,7 @@ list-style-type: none;
           </ul>
         </div>
         <div class="col-3">
-          <form {{if eq .IsAuthenticated 1}} hx-post="/create-post" hx-target="#posts" hx-swap="afterbegin" {{else}} action="/login" method="get" {{end}}>
+          <form {{if eq .IsAuthenticated 1}} hx-post="/create-post" hx-target="#posts" enctype="multipart/form-data" hx-swap="afterbegin" {{else}} action="/login" method="get" {{end}}>
             <h4>Post</h4>
             <div class="mb-3 input-group-lg">
               <label for="title-text" class="form-label">Title</label>
@@ -127,7 +144,8 @@ list-style-type: none;
               <label for="body-text" class="form-label">Body</label>
               <textarea name="body-text" id="body-text" cols="30" rows="7" class="form-control"></textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <input type="file" style="padding-bottom: 10px;" name="file"></button> 
+            <button type="submit" class="btn btn-primary">Submit</button> 
           </form>
         </div>
       </div>
@@ -136,7 +154,27 @@ list-style-type: none;
       function hrefFunction(){
                 windows.location.href = "http://localhost:8080/login";
             }
-    </script>
+      
+
+      function handleButtonClick() {
+        console.log(document.documentURI)
+      // Trigger the first hx-get request
+      document.getElementById('mybtn-up').addEventListener('htmx:afterSwap', function () {
+        // Trigger the second hx-get request after the first one is complete
+        htmx.trigger('.no_of_likes', 'click');
+      });
+    }
+    function handleButtonDownClick() {
+      // Trigger the first hx-get request
+      document.getElementById('mybtn-down').addEventListener('htmx:afterSwap', function () {
+        // Trigger the second hx-get request after the first one is complete
+        htmx.trigger('.no_of_likes', 'click');
+      });
+    }
+    document.getElementById('mybtn-up').addEventListener('click', handleButtonClick);
+    document.getElementById('mybtn-down').addEventListener('click', handleButtonDownClick);
+
+</script>
     <script src="../static/assets_login/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../static/assets_login/js/sidebars.js"></script></body>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script> 

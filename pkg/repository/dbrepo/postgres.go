@@ -2,6 +2,7 @@ package dbrepo
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/prranavv/reddit_clone/pkg/models"
@@ -46,19 +47,21 @@ func (m *postgresRepo) GetUserIDFromUsername(username string) (int, error) {
 	return id, nil
 }
 
-func (m *postgresRepo) CreatePost(username, title, body, subreddit string) error {
+func (m *postgresRepo) CreatePost(username, title, body, subreddit, image_path string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	query := `INSERT INTO public.post(
-		username, title, body, created_at, updated_at, subreddit)
-		VALUES ($1,$2,$3,$4,$5,$6);`
+		username, title, body, created_at, updated_at, subreddit,image_path)
+		VALUES ($1,$2,$3,$4,$5,$6,$7);`
 	_, err := m.DB.ExecContext(ctx, query,
 		username,
 		title,
 		body,
 		time.Now(),
 		time.Now(),
-		subreddit)
+		subreddit,
+		image_path,
+	)
 	if err != nil {
 		return err
 	}
@@ -69,12 +72,13 @@ func (m *postgresRepo) GetingPostsFromSubreddit(subreddit string) ([]models.Post
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	var Posts []models.Post
-	query := `SELECT p.post_id, p.title, p.body,p.username,l.no_of_likes
-	FROM public.post p join liked l on p.post_id=l.post_id where subreddit=$1;`
+	query := `SELECT p.post_id, p.title, p.body,p.username,p.image_path,l.no_of_likes
+	FROM public.post p join liked l on p.post_id=l.post_id where subreddit=$1 order by post_id desc	;`
 	rows, err := m.DB.QueryContext(ctx, query, subreddit)
 	if err != nil {
 		return Posts, err
 	}
+	var imgURL sql.NullString
 	defer rows.Close()
 	for rows.Next() {
 		var post models.Post
@@ -83,8 +87,12 @@ func (m *postgresRepo) GetingPostsFromSubreddit(subreddit string) ([]models.Post
 			&post.Title,
 			&post.Body,
 			&post.Username,
+			&imgURL,
 			&post.Liked.Likes,
 		)
+		if imgURL.Valid {
+			post.ImageUrl = imgURL.String
+		}
 		if err != nil {
 			return Posts, err
 		}

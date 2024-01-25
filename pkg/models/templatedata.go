@@ -8,4 +8,5 @@ type TemplateData struct {
 	IsAuthenticated int
 	Username        string
 	No_Of_Likes     int
+	Likedusers      map[string]bool
 }

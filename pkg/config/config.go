@@ -10,4 +10,6 @@ type Appconfig struct {
 	Session         *scs.SessionManager
 	IsAuthenticated int
 	Logger          *slog.Logger
+	Likedusers      map[*string]bool
+	DisLikedusers   map[*string]bool
 }

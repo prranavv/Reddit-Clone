@@ -20,6 +20,10 @@ const port = "8080"
 var session *scs.SessionManager
 var app config.Appconfig
 var logger *slog.Logger
+var (
+	Likedusers    = make(map[*string]bool)
+	DisLikedusers = make(map[*string]bool)
+)
 
 func main() {
 	//Create a logger
@@ -42,6 +46,8 @@ func main() {
 	session.Cookie.Secure = false
 	app.Session = session
 	app.Logger = logger
+	app.Likedusers = Likedusers
+	app.DisLikedusers = DisLikedusers
 	repo := handler.NewRepository(&app, db)
 	handler.NewHandler(repo)
 	helpers.NewHelpers(&app)

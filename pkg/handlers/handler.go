@@ -1,9 +1,13 @@
 package handler
 
 import (
+	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -35,6 +39,11 @@ func NewRepository(app *config.Appconfig, db *driver.DB) *Repository {
 func NewHandler(r *Repository) {
 	Repo = r
 }
+
+var (
+	Likedusers    = make(map[string]bool)
+	DisLikedusers = make(map[string]bool)
+)
 
 // Login handles the /login route
 func (m *Repository) Login(w http.ResponseWriter, r *http.Request) {
@@ -73,32 +82,51 @@ func (m *Repository) Logout(w http.ResponseWriter, r *http.Request) {
 
 func (m *Repository) ChangeUpIcon(w http.ResponseWriter, r *http.Request) {
 	post_id := chi.URLParam(r, "post_id")
+	logged_user := chi.URLParam(r, "logged_user")
 	int_post_id, err := strconv.Atoi(post_id)
 	if err != nil {
 		m.App.Logger.Error(err.Error())
 		return
 	}
+	if Likedusers[logged_user] {
+		err = m.DB.Disliking(int_post_id)
+		if err != nil {
+			m.App.Logger.Error(err.Error(),
+				slog.String("Type", "Database error"))
+			return
+		}
+		Likedusers[logged_user] = false
+		render.RenderTemplate(w, r, "not_filled_up_icon.html", &models.TemplateData{})
+		return
+	}
+
 	err = m.DB.AddingLikes(int_post_id)
 	if err != nil {
 		m.App.Logger.Error(err.Error(),
 			slog.String("Type", "Database error"))
 		return
 	}
-	no_of_likes, err := m.DB.GettingLikes(int_post_id)
-	if err != nil {
-		m.App.Logger.Error(err.Error(),
-			slog.String("Type", "Database error"))
-		return
-	}
-	render.RenderTemplate(w, r, "filled_up_icon.html", &models.TemplateData{No_Of_Likes: no_of_likes})
-
+	Likedusers[logged_user] = true
+	render.RenderTemplate(w, r, "filled_up_icon.html", &models.TemplateData{})
 }
 
 func (m *Repository) ChangeDownIcon(w http.ResponseWriter, r *http.Request) {
 	post_id := chi.URLParam(r, "post_id")
+	logged_user := chi.URLParam(r, "logged_user")
 	int_post_id, err := strconv.Atoi(post_id)
 	if err != nil {
 		m.App.Logger.Error(err.Error())
+		return
+	}
+	if DisLikedusers[logged_user] {
+		err = m.DB.AddingLikes(int_post_id)
+		if err != nil {
+			m.App.Logger.Error(err.Error(),
+				slog.String("Type", "Database error"))
+			return
+		}
+		DisLikedusers[logged_user] = false
+		render.RenderTemplate(w, r, "not_filled_down_icon.html", &models.TemplateData{})
 		return
 	}
 	err = m.DB.Disliking(int_post_id)
@@ -107,13 +135,8 @@ func (m *Repository) ChangeDownIcon(w http.ResponseWriter, r *http.Request) {
 			slog.String("Type", "Database error"))
 		return
 	}
-	no_of_likes, err := m.DB.GettingLikes(int_post_id)
-	if err != nil {
-		m.App.Logger.Error(err.Error(),
-			slog.String("Type", "Database error"))
-		return
-	}
-	render.RenderTemplate(w, r, "filled_down_icon.html", &models.TemplateData{No_Of_Likes: no_of_likes})
+	DisLikedusers[logged_user] = true
+	render.RenderTemplate(w, r, "filled_down_icon.html", &models.TemplateData{})
 }
 
 // Signup handles the /signup route
@@ -314,23 +337,65 @@ type Post struct {
 
 // CreatePost creates a new post using htmx
 func (m *Repository) CreatePost(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
-		m.App.Logger.Error(err.Error(), slog.String("method", r.Method))
+		m.App.Logger.Error(
+			err.Error(),
+			slog.String("method", r.Method),
+		)
 		return
 	}
+	var image_path string
+	stringmap := map[string]string{}
+
+	files, ok := r.MultipartForm.File["file"]
+	if ok || len(files) != 0 {
+		file, handler, err := r.FormFile("file")
+		if err != nil {
+
+			m.App.Logger.Error(
+				err.Error(),
+				slog.String("method", r.Method),
+			)
+			return
+		}
+		defer file.Close()
+		dst, err := os.Create(filepath.Join("./static/uploads", handler.Filename))
+		if err != nil {
+			m.App.Logger.Error(
+				err.Error(),
+				slog.String("method", r.Method),
+			)
+			return
+		}
+		defer dst.Close()
+
+		_, err = io.Copy(dst, file)
+		if err != nil {
+			m.App.Logger.Error(
+				err.Error(),
+				slog.String("method", r.Method),
+			)
+			return
+		}
+		stringmap["Imagename"] = handler.Filename
+		image_path = fmt.Sprintf("../static/uploads/%s", handler.Filename)
+
+	}
+
 	body := r.FormValue("body-text")
 	title := r.FormValue("title-text")
 	//adding the details to the stringmap
-	stringmap := map[string]string{}
 	stringmap["Body"] = body
 	stringmap["Title"] = title
 	if body == "" || title == "" {
 		return
 	}
+
 	username := m.App.Session.Get(r.Context(), "username").(string)
+
 	stringmap["Username"] = username
-	//adding the details to the database
+	//adding the details to the databaser
 	subreddit, err := helpers.GettingSubRedditFromURL(r)
 	if err != nil {
 		m.App.Logger.Error(
@@ -340,6 +405,7 @@ func (m *Repository) CreatePost(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
+
 	post_ids, err := m.DB.CheckingDuplicatePost(body, title, subreddit, username)
 	if err != nil {
 		m.App.Logger.Error(err.Error(),
@@ -351,13 +417,15 @@ func (m *Repository) CreatePost(w http.ResponseWriter, r *http.Request) {
 		m.App.Logger.Info("Duplicate post in database")
 		return
 	}
-	err = m.DB.CreatePost(username, title, body, subreddit)
+
+	err = m.DB.CreatePost(username, title, body, subreddit, image_path)
 	if err != nil {
 		m.App.Logger.Error(err.Error(),
 			slog.String("method", r.Method),
 			slog.String("Type", "Database Error"))
 		return
 	}
+
 	post_id, err := m.DB.GettingPostIDFromDetails(username, title, body, subreddit)
 	if err != nil {
 		m.App.Logger.Error(
@@ -367,6 +435,8 @@ func (m *Repository) CreatePost(w http.ResponseWriter, r *http.Request) {
 		)
 		return
 	}
+	stringmap["PostId"] = strconv.Itoa(post_id)
+
 	err = m.DB.InsertingDataIntoLikedTable(post_id)
 	if err != nil {
 		m.App.Logger.Error(
@@ -376,16 +446,35 @@ func (m *Repository) CreatePost(w http.ResponseWriter, r *http.Request) {
 		)
 		return
 	}
-	// posts, err := m.DB.GetingPostsFromSubreddit(subreddit)
-	// if err != nil {
-	// 	m.App.Logger.Error(err.Error(),
-	// 		slog.String("method", r.Method),
-	// 		slog.String("Type", "Database Error"))
-	// 	return
-	// }
-	// log.Print(posts)
-	// htmlstr := fmt.Sprintf("<br><div class='card'><br><div class='card-header'>u/PranavKumar</div><div class='card-body' ><blockquote class='blockquote mb-0'><p><strong>What is this post</strong></p><p>A well-known quote, contained in a blockquote element.</p><footer class='blockquote-footer'>Someone famous in <cite title='Source Title'>Source Title</cite></footer></blockquote></div></div>")
-	// tmpl, _ := template.New("t").Parse(htmlstr)
-	// tmpl.Execute(w, Post{Body: body, Title: title})
 	render.RenderTemplate(w, r, "post.html", &models.TemplateData{StringMap: stringmap})
+}
+
+func (m *Repository) DeletePost(w http.ResponseWriter, r *http.Request) {
+	post_id := chi.URLParam(r, "post_id")
+	int_post_id, err := strconv.Atoi(post_id)
+	if err != nil {
+		m.App.Logger.Error(err.Error())
+		return
+	}
+	err = m.DB.DeletePost(int_post_id)
+	if err != nil {
+		m.App.Logger.Error(err.Error())
+		return
+	}
+}
+
+func (m *Repository) GetLikesByPostID(w http.ResponseWriter, r *http.Request) {
+	post_id := chi.URLParam(r, "post_id")
+	int_post_id, err := strconv.Atoi(post_id)
+	if err != nil {
+		m.App.Logger.Error(err.Error())
+		return
+	}
+	no_of_likes, err := m.DB.GettingLikes(int_post_id)
+	if err != nil {
+		m.App.Logger.Error(err.Error(),
+			slog.String("Type", "Database error"))
+		return
+	}
+	fmt.Fprint(w, strconv.Itoa(no_of_likes))
 }

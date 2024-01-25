@@ -28,8 +28,8 @@ func routes() *chi.Mux {
 	//home page
 	mux.Get("/", handler.Repo.Home)
 	//icon change
-	mux.Get("/change-upicon/{post_id}", handler.Repo.ChangeUpIcon)
-	mux.Get("/change-downicon/{post_id}", handler.Repo.ChangeDownIcon)
+	mux.Post("/change-upicon/{post_id}/{logged_user}", handler.Repo.ChangeUpIcon)
+	mux.Post("/change-downicon/{post_id}/{logged_user}", handler.Repo.ChangeDownIcon)
 	//subreddit pages
 	mux.Get("/r/askreddit", handler.Repo.Askreddit)
 	mux.Get("/r/aww", handler.Repo.Aww)
@@ -41,5 +41,7 @@ func routes() *chi.Mux {
 	mux.Get("/r/food", handler.Repo.Food)
 	//handling posting a post
 	mux.Post("/create-post", handler.Repo.CreatePost)
+	mux.Delete("/delete-post/{post_id}", handler.Repo.DeletePost)
+	mux.Get("/getLikes/{post_id}", handler.Repo.GetLikesByPostID)
 	return mux
 }
