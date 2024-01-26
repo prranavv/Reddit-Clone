@@ -1,4 +1,0 @@
-create_table("liked"){
-  t.Column("post_id", "integer", {primary:true}) 
-  t.Column("liked","bool",{"null": true}) 
-}
