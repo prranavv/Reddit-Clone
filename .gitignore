@@ -2,3 +2,4 @@ database.yml
 run.sh
 reddit
 .env
+static/uploads/

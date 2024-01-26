@@ -84,7 +84,9 @@ list-style-type: none;
             {{$liked:=.Liked.Liked}}
             {{$usr:=.Username}}
             {{$img:=.ImageUrl}}
+            {{$vurl:=.VideoUrl}}
             {{$yn:=print ""}}
+            {{$nyn:=print "../static/uploads/"}}
             <li id="PostID-{{.Post_ID}}">
               <div id="{{$usr}}-{{$lusr}}"></div>
               <br>
@@ -98,8 +100,16 @@ list-style-type: none;
                     <p class="para">{{.Body}}</p>
                     {{if eq $img $yn}}
 
+                    {{else if eq $img $nyn}}
+
                     {{else}}
                     <img style="height: auto; width: 700px; padding-bottom: 20px;" src="{{.ImageUrl}}" alt="">
+                    {{end}}
+
+                    {{if eq $vurl $nyn}}
+
+                    {{else}}
+                    <video width="700px" height="auto" controls><source src="{{.VideoUrl}}"></video>
                     {{end}}
                   </blockquote>
                   <button class="btns mybtn-up" id="mybtn-up" {{if eq $ewq 1}} hx-post="/change-upicon/{{.Post_ID}}/{{$lusr}}"  hx-trigger="click" type="submit" onclick="hrefFunction()" {{end}}>

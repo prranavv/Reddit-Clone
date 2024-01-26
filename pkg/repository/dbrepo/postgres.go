@@ -47,12 +47,12 @@ func (m *postgresRepo) GetUserIDFromUsername(username string) (int, error) {
 	return id, nil
 }
 
-func (m *postgresRepo) CreatePost(username, title, body, subreddit, image_path string) error {
+func (m *postgresRepo) CreatePost(username, title, body, subreddit, image_path, video_path string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	query := `INSERT INTO public.post(
-		username, title, body, created_at, updated_at, subreddit,image_path)
-		VALUES ($1,$2,$3,$4,$5,$6,$7);`
+		username, title, body, created_at, updated_at, subreddit,image_path,video_path)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8);`
 	_, err := m.DB.ExecContext(ctx, query,
 		username,
 		title,
@@ -61,6 +61,7 @@ func (m *postgresRepo) CreatePost(username, title, body, subreddit, image_path s
 		time.Now(),
 		subreddit,
 		image_path,
+		video_path,
 	)
 	if err != nil {
 		return err
@@ -72,13 +73,14 @@ func (m *postgresRepo) GetingPostsFromSubreddit(subreddit string) ([]models.Post
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	var Posts []models.Post
-	query := `SELECT p.post_id, p.title, p.body,p.username,p.image_path,l.no_of_likes
+	query := `SELECT p.post_id, p.title, p.body,p.username,p.image_path,p.video_path,l.no_of_likes
 	FROM public.post p join liked l on p.post_id=l.post_id where subreddit=$1 order by post_id desc	;`
 	rows, err := m.DB.QueryContext(ctx, query, subreddit)
 	if err != nil {
 		return Posts, err
 	}
 	var imgURL sql.NullString
+	var videoURL sql.NullString
 	defer rows.Close()
 	for rows.Next() {
 		var post models.Post
@@ -88,10 +90,14 @@ func (m *postgresRepo) GetingPostsFromSubreddit(subreddit string) ([]models.Post
 			&post.Body,
 			&post.Username,
 			&imgURL,
+			&videoURL,
 			&post.Liked.Likes,
 		)
 		if imgURL.Valid {
 			post.ImageUrl = imgURL.String
+		}
+		if videoURL.Valid {
+			post.VideoUrl = videoURL.String
 		}
 		if err != nil {
 			return Posts, err

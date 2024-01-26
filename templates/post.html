@@ -1,8 +1,11 @@
 {{$img:= index .StringMap "Imagename"}}
+{{$vurl:=index .StringMap "Videoname"}}
 {{$yn:=print ""}}
+{{$nyn:=print "../static/uploads/"}}
+
 <br>
     <li id="PostID-{{index .StringMap "PostId"}}">
-  <div class="card">
+  <div class="card {{$img}} {{$vurl}}">
     <div class="card-header">
     u/{{index .StringMap "Username"}}
     </div>
@@ -11,9 +14,14 @@
         <p><strong>{{index .StringMap "Title"}}</strong></p>
         <p style="padding-bottom: 10px;">{{index .StringMap "Body"}}</p>
         {{if eq $img $yn}}
-
+    
         {{else}}
         <img style="height: auto; width: 700px; padding-bottom: 20px;" src="../static/uploads/{{index .StringMap "Imagename"}}" alt="">
+        {{end}}
+        {{if eq $vurl $yn}}
+
+        {{else}}
+          <video width="700px" height="auto" controls><source src="../static/uploads/{{index .StringMap "Videoname"}}"></video>
         {{end}}
       </blockquote>
         <button class="btn" id="mybtn" hx-post="/change-upicon/{{index .StringMap "PostId"}}" hx-trigger="click">
@@ -22,7 +30,7 @@
           </svg>
         </button>
         <span id="vote">0</span>
-      <button class="btn" id="mybtn-down" hx-post="/change-downicon/{{index .StringMap "PostId"}}" hx-trigger="click">
+          <button class="btn" id="mybtn-down" hx-post="/change-downicon/{{index .StringMap "PostId"}}" hx-trigger="click">
         <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-arrow-down-circle" viewBox="0 0 16 16">
         <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v5.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V4.5z"/>
       </svg>

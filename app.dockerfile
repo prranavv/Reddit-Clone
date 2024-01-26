@@ -1,8 +1,10 @@
-FROM golang:1.21.1-alpine
+FROM alpine:latest
+
+RUN mkdir /app
 
 WORKDIR /app
 
-COPY . .
+COPY . /app
 
 RUN go mod download
 

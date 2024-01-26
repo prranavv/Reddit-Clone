@@ -18,6 +18,7 @@ type Post struct {
 	Created_at time.Time
 	Updated_at time.Time
 	ImageUrl   string
+	VideoUrl   string
 }
 
 type Liked struct {

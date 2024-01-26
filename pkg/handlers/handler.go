@@ -135,6 +135,7 @@ func (m *Repository) ChangeDownIcon(w http.ResponseWriter, r *http.Request) {
 			slog.String("Type", "Database error"))
 		return
 	}
+
 	DisLikedusers[logged_user] = true
 	render.RenderTemplate(w, r, "filled_down_icon.html", &models.TemplateData{})
 }
@@ -167,6 +168,9 @@ func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	path := m.App.Session.PopString(r.Context(), "path")
+	if path == "/signup" {
+		path = "/"
+	}
 	m.App.Session.Put(r.Context(), "authenticated", "true")
 	m.App.Session.Put(r.Context(), "username", username)
 	http.Redirect(w, r, path, http.StatusSeeOther)
@@ -346,6 +350,7 @@ func (m *Repository) CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var image_path string
+	var video_path string
 	stringmap := map[string]string{}
 
 	files, ok := r.MultipartForm.File["file"]
@@ -369,7 +374,6 @@ func (m *Repository) CreatePost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer dst.Close()
-
 		_, err = io.Copy(dst, file)
 		if err != nil {
 			m.App.Logger.Error(
@@ -378,11 +382,18 @@ func (m *Repository) CreatePost(w http.ResponseWriter, r *http.Request) {
 			)
 			return
 		}
-		stringmap["Imagename"] = handler.Filename
-		image_path = fmt.Sprintf("../static/uploads/%s", handler.Filename)
+		media_type := strings.Split(handler.Filename, ".")[1]
+		if media_type != "mp4" {
+			stringmap["Imagename"] = handler.Filename
+			stringmap["Videoname"] = ""
+		} else {
+			stringmap["Imagename"] = ""
+			stringmap["Videoname"] = handler.Filename
+		}
+		image_path = fmt.Sprintf("../static/uploads/%s", stringmap["Imagename"])
+		video_path = fmt.Sprintf("../static/uploads/%s", stringmap["Videoname"])
 
 	}
-
 	body := r.FormValue("body-text")
 	title := r.FormValue("title-text")
 	//adding the details to the stringmap
@@ -418,7 +429,7 @@ func (m *Repository) CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = m.DB.CreatePost(username, title, body, subreddit, image_path)
+	err = m.DB.CreatePost(username, title, body, subreddit, image_path, video_path)
 	if err != nil {
 		m.App.Logger.Error(err.Error(),
 			slog.String("method", r.Method),
