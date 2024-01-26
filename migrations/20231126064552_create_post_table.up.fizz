@@ -1,6 +1,0 @@
-create_table("post"){
-  t.Column("post_id", "integer", {primary:true}) 
-  t.Column("user_id","integer",{}) 
-  t.Column("title", "string", {"size": 255})
-  t.Column("body", "text", {})
-}
