@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 16.0 (Ubuntu 16.0-1.pgdg22.04+1)
--- Dumped by pg_dump version 16.0 (Ubuntu 16.0-1.pgdg22.04+1)
+-- Dumped from database version 16.1 (Ubuntu 16.1-1.pgdg22.04+1)
+-- Dumped by pg_dump version 16.1 (Ubuntu 16.1-1.pgdg22.04+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -66,7 +66,9 @@ CREATE TABLE public.post (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     subreddit character varying(255) NOT NULL,
-    username character varying(255) NOT NULL
+    username character varying(255) NOT NULL,
+    image_path character varying(255),
+    video_path character varying(255)
 );
 
 
