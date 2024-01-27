@@ -390,10 +390,11 @@ func (m *Repository) CreatePost(w http.ResponseWriter, r *http.Request) {
 			stringmap["Imagename"] = ""
 			stringmap["Videoname"] = handler.Filename
 		}
-		image_path = fmt.Sprintf("../static/uploads/%s", stringmap["Imagename"])
-		video_path = fmt.Sprintf("../static/uploads/%s", stringmap["Videoname"])
 
 	}
+	image_path = fmt.Sprintf("../static/uploads/%s", stringmap["Imagename"])
+	video_path = fmt.Sprintf("../static/uploads/%s", stringmap["Videoname"])
+
 	body := r.FormValue("body-text")
 	title := r.FormValue("title-text")
 	//adding the details to the stringmap
