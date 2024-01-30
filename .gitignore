@@ -3,3 +3,5 @@ run.sh
 reddit
 .env
 static/uploads/
+app.dockerfile
+docker-compose.yml

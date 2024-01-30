@@ -34,6 +34,18 @@ list-style-type: none;
 .para{
   padding-bottom: 10px;
 }
+
+.htmx-indicator{
+        opacity:0;
+        transition: opacity 500ms ease-in;
+    }
+    .htmx-request .htmx-indicator{
+        opacity:1
+    }
+    .htmx-request.htmx-indicator{
+        opacity:1
+    }
+
 </style>
 <body>
     <nav class="navbar navbar-expand-lg sticky-top">
@@ -144,7 +156,7 @@ list-style-type: none;
           </ul>
         </div>
         <div class="col-3">
-          <form {{if eq .IsAuthenticated 1}} hx-post="/create-post" hx-target="#posts" enctype="multipart/form-data" hx-swap="afterbegin" {{else}} action="/login" method="get" {{end}}>
+          <form {{if eq .IsAuthenticated 1}} hx-post="/create-post" hx-indicator="#spinner" hx-target="#posts" enctype="multipart/form-data" hx-swap="afterbegin" {{else}} action="/login" method="get" {{end}}>
             <h4>Post</h4>
             <div class="mb-3 input-group-lg">
               <label for="title-text" class="form-label">Title</label>
@@ -156,6 +168,7 @@ list-style-type: none;
             </div>
             <input type="file" style="padding-bottom: 10px;" name="file"></button> 
             <button type="submit" class="btn btn-primary">Submit</button> 
+            <img  id="spinner" class="htmx-indicator" src="https://i.imgur.com/8THYvPQ.gif"/>
           </form>
         </div>
       </div>

@@ -40,7 +40,7 @@ func main() {
 	defer db.SQL.Close()
 	//Loading the session and setting up constants
 	session = scs.New()
-	session.Lifetime = 24 * time.Hour
+	session.Lifetime = 1 * time.Hour
 	session.Cookie.Persist = true
 	session.Cookie.SameSite = http.SameSiteLaxMode
 	session.Cookie.Secure = false
