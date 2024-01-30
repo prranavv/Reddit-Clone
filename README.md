@@ -32,7 +32,7 @@ First build a binary of the application.
 
 `go build -o reddit cmd/web/*.go`
 
-In this case, I build the binary and named it "reddit". Run this binary as an executable and it will run in your machine.
+In this case, I built the binary and named it "reddit". Run this binary as an executable and it will run in your machine.
 If everything works you will get the following logs in your terminal
 
 `{
