@@ -23,7 +23,7 @@ Also add .env file with the key "DATABASE_URL" and add your database connection 
 
 ## Prerequisites
 
-1. Have the latest version of go installed to run.
+1. Have the latest version of go installed.
 2. Latest version of Postgres.
 
 ## Installing
