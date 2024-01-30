@@ -1,6 +1,7 @@
 # Reddit Clone
 
 This project has been a passion project of mine for a while and I wanted to create something I would enjoy as my first real project.
+Here is the [link](https://172-235-29-203.ip.linodeusercontent.com/) to this project which has been deployed.
 
 ## Getting Started
 
