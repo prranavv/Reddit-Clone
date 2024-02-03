@@ -15,6 +15,12 @@ For the database,I used **Postgres** for storing all the user data.
 ## Getting Started
 
 To run this application in your local machine, have a postgres database set up and create a database.yml and add the neccesary configurations. An example of the database.yml is there in the database.yml.example file.
+<br>
+Also run the following code to add the tables and indices to the database.
+<br>
+`soda migrate up`
+<br>
+
 Also add .env file with the key "DATABASE_URL" and add your database connection string. Below is an example of a connection string
 
 `host=localhost port=5432 dbname=reddit user=reddit password=reddit sslmode=disable`
