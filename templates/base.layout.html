@@ -54,11 +54,12 @@ background-color: #ffa500;
               {{end}}
             </ul>
           </div>
-        </div>
-        {{if eq .IsAuthenticated 1}}
+          {{if eq .IsAuthenticated 1}}
         <p style="padding-right: 10px;">u/{{.Username}}</p>
         {{else}}
         {{end}}
+        </div>
+        
       </nav>
       {{block "content" .}}
 
