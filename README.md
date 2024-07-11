@@ -23,7 +23,7 @@ Also run the following code to add the tables and indices to the database.
 
 Also add .env file with the key "DATABASE_URL" and add your database connection string. Below is an example of a connection string
 
-`host=localhost port=5432 dbname=reddit user=reddit password=reddit sslmode=disable`
+`host=localhost port=5432 dbname=dbname user=user password=pwd sslmode=disable`
 
 
 
