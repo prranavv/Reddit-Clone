@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="logo.svg" alt="Reddit Clone Logo" width="180"/>
-</p>
-
 <h1 align="center">Reddit Clone</h1>
 <p align="center"><strong>Full-Stack Social Platform Built with Go, HTMX & PostgreSQL</strong></p>
 
@@ -16,10 +12,6 @@
 
 <p align="center">
   A server-rendered Reddit-style social platform built with Go's standard library and chi-router on the backend, HTMX for dynamic interactions on the frontend, and PostgreSQL for persistence. No heavy JavaScript frameworks — just HTML, CSS, and HTMX.
-</p>
-
-<p align="center">
-  <a href="https://172-235-29-203.ip.linodeusercontent.com/"><strong>Live Demo →</strong></a>
 </p>
 
 ---
